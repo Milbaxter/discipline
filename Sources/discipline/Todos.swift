@@ -82,15 +82,27 @@ final class TodoWindow: NSPanel {
 }
 
 enum Todoist {
-    private static var tokenURL: URL {
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".config/orchestrator/todoist_token")
+    private static var tokenURLs: [URL] {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        return [
+            home.appendingPathComponent(".config/discipline/todoist_token"),
+            home.appendingPathComponent(".config/orchestrator/todoist_token"),
+        ]
+    }
+
+    private static var token: String? {
+        for url in tokenURLs {
+            if let t = (try? String(contentsOf: url, encoding: .utf8))?
+                .trimmingCharacters(in: .whitespacesAndNewlines), !t.isEmpty {
+                return t
+            }
+        }
+        return nil
     }
 
     /// Fetch open tasks; calls back on the main queue with display lines.
     static func fetchTasks(completion: @escaping ([String]) -> Void) {
-        guard let token = (try? String(contentsOf: tokenURL, encoding: .utf8))?
-            .trimmingCharacters(in: .whitespacesAndNewlines), !token.isEmpty
+        guard let token
         else {
             DispatchQueue.main.async { completion(["no todoist token found"]) }
             return

@@ -7,7 +7,10 @@ blocking of X/Twitter, YouTube, Instagram, TikTok, Twitch and Reddit via `/etc/h
 ## One-time setup
 
 ```sh
-cd ~/discipline && sudo ./install.sh
+git clone https://github.com/Milbaxter/discipline.git
+cd discipline
+./build.sh
+sudo ./install.sh
 ```
 
 This installs a root-owned helper at `/usr/local/bin/discipline-hosts` and a
@@ -26,8 +29,9 @@ the menu bar as ◇.
 - **unblock** button (bottom-right pill) or **Stop Session** — ends the session
   and restores your hosts file
 - **todos** panel (above the timer pill) — your open Todoist tasks, fetched at
-  session start (token: `~/.config/orchestrator/todoist_token`). The ✕ hides it
-  for the current session; every new session shows it again.
+  session start. Optional: put an API token in
+  `~/.config/discipline/todoist_token` to enable it. The ✕ hides it for the
+  current session; every new session shows it again.
 - Quitting the app also unblocks.
 
 When a session starts, open Brave tabs on blocked sites are closed
