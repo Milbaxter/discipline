@@ -1,0 +1,64 @@
+#!/bin/bash
+# discipline-hosts — toggle social media blocking via /etc/hosts.
+# Installed root-owned at /usr/local/bin/discipline-hosts; the discipline app
+# calls it with passwordless sudo (see install.sh). Only ever touches the
+# section between the two marker lines below.
+set -euo pipefail
+
+HOSTS=/etc/hosts
+START="# >>> discipline >>>"
+END="# <<< discipline <<<"
+
+DOMAINS=(
+  x.com www.x.com
+  twitter.com www.twitter.com mobile.twitter.com
+  youtube.com www.youtube.com m.youtube.com
+  youtu.be www.youtu.be
+  youtube-nocookie.com www.youtube-nocookie.com
+  instagram.com www.instagram.com
+  tiktok.com www.tiktok.com vm.tiktok.com
+  twitch.tv www.twitch.tv m.twitch.tv
+  reddit.com www.reddit.com old.reddit.com new.reddit.com i.redd.it
+  telegram.org www.telegram.org web.telegram.org t.me
+  whatsapp.com www.whatsapp.com web.whatsapp.com
+  discord.com www.discord.com discordapp.com www.discordapp.com discord.gg
+)
+
+remove_section() {
+  sed -i '' "/^${START}\$/,/^${END}\$/d" "$HOSTS"
+}
+
+add_section() {
+  {
+    echo "$START"
+    for d in "${DOMAINS[@]}"; do
+      echo "0.0.0.0 $d"
+      echo ":: $d"
+    done
+    echo "$END"
+  } >> "$HOSTS"
+}
+
+flush_dns() {
+  dscacheutil -flushcache || true
+  killall -HUP mDNSResponder || true
+}
+
+case "${1:-}" in
+  block)
+    remove_section
+    add_section
+    flush_dns
+    ;;
+  unblock)
+    remove_section
+    flush_dns
+    ;;
+  status)
+    if grep -q "^${START}\$" "$HOSTS"; then echo blocked; else echo unblocked; fi
+    ;;
+  *)
+    echo "usage: discipline-hosts block|unblock|status" >&2
+    exit 1
+    ;;
+esac
