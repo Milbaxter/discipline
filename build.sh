@@ -14,7 +14,7 @@ if [ -f /Library/Developer/CommandLineTools/usr/include/swift/module.modulemap ]
 fi
 
 mkdir -p bin
-swiftc "${OVERLAY_ARGS[@]}" -O -o bin/discipline Sources/discipline/*.swift
+swiftc ${OVERLAY_ARGS[@]+"${OVERLAY_ARGS[@]}"} -O -o bin/discipline Sources/discipline/*.swift
 
 APP="/Applications/Discipline.app"
 if ! mkdir -p "$APP/Contents/MacOS" 2>/dev/null; then
